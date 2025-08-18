@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Schüler-Tool</title>
+  <style>
+    :root { --pad: 14px; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; color: #111; background: #fafafa; }
+    header { padding: 16px 20px; background: #2d3648; color: #fff; display: flex; align-items: center; gap: 15px; }
+    header h1 { margin: 0 0 4px; font-size: 20px; }
+    header p { margin: 0; opacity: .85; }
+    header .logo-svg { width: 40px; height: 40px; }
+    main { padding: 20px; display: grid; gap: 18px; grid-template-columns: 1.1fr .9fr; align-items: start; }
+    @media (max-width: 960px) { main { grid-template-columns: 1fr; } }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+    .card.full-width { grid-column: 1 / -1; }
+    .card h2 { margin: 0; padding: var(--pad); border-bottom: 1px solid #eef1f4; font-size: 16px; background: #fbfbfd;}
+    .card .content { padding: var(--pad); }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    label { font-weight: 600; font-size: 13px; }
+    input[type="number"], input[type="text"], textarea, select {
+      border: 1px solid #d1d5db; border-radius: 10px; padding: 8px 10px; font-size: 14px; width: 100%; box-sizing: border-box; background: #fff;
+    }
+    textarea { min-height: 70px; }
+    .grid { display: grid; gap: 8px; margin-top: 12px; }
+    .seat { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; text-align: center; min-width: 80px; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+    .muted { color: #6b7280; }
+    .btn { background: #2d6cdf; color: #fff; border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
+    .btn.secondary { background: #10b981; }
+    .btn.ghost { background: #f3f4f6; color: #111; border: 1px solid #e5e7eb; }
+    .btn.danger { background: #ef4444; }
+    .stack { display: grid; gap: 10px; }
+    .pill { display:inline-block; background:#f3f4f6; border:1px solid #e5e7eb; padding:2px 8px; border-radius:999px; font-size:12px; }
+    .pair { display: inline-flex; align-items: center; gap: 8px; background: #f4f8ff; border: 1px solid #dbe7ff; color: #1e3a8a; padding: 6px 10px; border-radius: 999px; margin: 4px 6px 0 0; }
+    .pair .x { cursor: pointer; opacity: .7; font-weight: 700; padding: 0 2px; }
+    .group { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin: 6px; display: inline-block; min-width: 120px; vertical-align: top; }
+    .toggle { display: inline-flex; align-items: center; gap: 8px; }
+    .hint { font-size: 12px; color: #6b7280; }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .footer { padding: 8px var(--pad); border-top: 1px solid #eef1f4; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .error { color: #b91c1c; font-weight: 600; }
+    .success { color: #065f46; font-weight: 600; }
+    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; padding:2px 6px; }
+    .spacer { height: 8px; }
+    .tab-container { display: flex; border-bottom: 1px solid #eef1f4; }
+    .tab { padding: 10px 20px; cursor: pointer; border-right: 1px solid #eef1f4; border-top-right-radius: 14px; border-top-left-radius: 14px; background: #fbfbfd; border-left: 1px solid #eef1f4; margin-left: -1px; }
+    .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: 600; }
+    .tab-content { padding: var(--pad); }
+  </style>
+</head>
+<body>
+  <header>
+    <!-- Logo SVG -->
+    <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#2d6cdf" rx="15" ry="15"/>
+      <rect x="30" y="20" width="40" height="60" fill="#ffeb3b" rx="5" ry="5"/>
+      <polygon points="30,20 50,5 70,20" fill="#795548"/>
+      <rect x="30" y="80" width="40" height="10" fill="#ef9a9a"/>
+      <rect x="30" y="77" width="40" height="3" fill="#ccc"/>
+      <line x1="30" y1="40" x2="70" y2="40" stroke="#fdd835" stroke-width="2"/>
+      <line x1="30" y1="60" x2="70" y2="60" stroke="#fdd835" stroke-width="2"/>
+      <line x1="40" y1="20" x2="40" y2="80" stroke="#fdd835" stroke-width="2"/>
+      <line x1="60" y1="20" x2="60" y2="80" stroke="#fdd835" stroke-width="2"/>
+      <circle cx="50" cy="50" r="10" fill="#fff"/>
+      <circle cx="40" cy="40" r="4" fill="#1e88e5"/>
+      <circle cx="60" cy="40" r="4" fill="#ef5350"/>
+      <circle cx="40" cy="60" r="4" fill="#4caf50"/>
+      <circle cx="60" cy="60" r="4" fill="#ff9800"/>
+    </svg>
+    <div>
+      <h1>Schüler-Tool</h1>
+      <p>Sitzplan- & Gruppen-Generator mit Regeln.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Schülerliste</h2>
+      <div class="content stack">
+        <div>
+          <label>Namen einzeln hinzufügen</label>
+          <div class="row">
+            <input type="text" id="studentInput" placeholder="Name des Schülers"/>
+            <button class="btn" id="addStudent">Hinzufügen</button>
+          </div>
+        </div>
+        <div>
+          <label>Oder aus Datei laden</label>
+          <div class="row">
+            <input type="file" id="studentsFile" accept=".csv,.txt"/>
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <div>
+          <label>Aktuelle Schüler</label>
+          <div id="studentsList" style="margin-top:4px;">Keine Schüler hinzugefügt.</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="row">
+          <button class="btn secondary" id="pickRandom">🎲 Zufälligen Schüler auswählen</button>
+          <div id="randomOut" class="muted"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tab-container">
+        <div class="tab active" data-tab="plan">Sitzplan</div>
+        <div class="tab" data-tab="groups">Gruppen</div>
+      </div>
+      
+      <div id="panel-plan" class="tab-content active">
+        <h2>Sitzplan-Generator</h2>
+        <div class="stack">
+          <div>
+            <label>Layout wählen</label>
+            <div class="row">
+              <input type="radio" id="layoutRegular" name="layoutType" value="regular" checked>
+              <label for="layoutRegular">Regelmäßiges Raster</label>
+              <input type="radio" id="layoutIrregular" name="layoutType" value="irregular">
+              <label for="layoutIrregular">Unregelmäßiges Layout</label>
+            </div>
+          </div>
+
+          <div id="regularLayout" class="stack">
+            <div class="cols">
+              <div>
+                <label for="rows">Anzahl der Reihen</label>
+                <input type="number" id="rows" value="5" min="1"/>
+              </div>
+              <div>
+                <label for="cols">Anzahl der Spalten</label>
+                <input type="number" id="cols" value="5" min="1"/>
+              </div>
+            </div>
+          </div>
+          
+          <div id="irregularLayout" class="stack" style="display:none;">
+            <div>
+              <label>Sitzplan-Layout</label>
+              <textarea id="roomLayout" placeholder="Anzahl der Plätze pro Reihe, z.B. 6,4,6"></textarea>
+              <div class="hint">Gib die Anzahl der Plätze pro Reihe an, getrennt durch Kommas. Beispiel: `6,4,6`</div>
+            </div>
+          </div>
+          
+          <div class="toggle">
+            <input type="checkbox" id="forbidDiagonal"/>
+            <label for="forbidDiagonal">Auch diagonale Nachbarschaft verbieten</label>
+          </div>
+          <div class="hint">„Nebeneinander“ bei <b>MUSS</b> bedeutet ausschließlich <b>horizontal</b> in derselben Reihe (nicht hintereinander).</div>
+        </div>
+        <div class="spacer"></div>
+        <div class="stack">
+          <label>Regeln hinzufügen</label>
+          <div class="cols">
+            <div class="row" style="align-items:flex-end;">
+              <div style="flex:1">
+                <label>Muss nebeneinander (horizontal)</label>
+                <div class="row">
+                  <select id="mustA"></select>
+                  <select id="mustB"></select>
+                </div>
+              </div>
+              <button class="btn secondary" id="addMust">Paar hinzufügen</button>
+            </div>
+            <div class="row" style="align-items:flex-end;">
+              <div style="flex:1">
+                <label>Darf nicht nebeneinander (horiz./vert.)</label>
+                <div class="row">
+                  <select id="notA"></select>
+                  <select id="notB"></select>
+                </div>
+              </div>
+              <button class="btn danger" id="addNot">Paar hinzufügen</button>
+            </div>
+          </div>
+          <div>
+            <div id="mustList"></div>
+            <div id="notList"></div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="row">
+            <button class="btn" id="genPlan">Sitzplan generieren</button>
+            <button class="btn ghost" id="downloadCsv" disabled>Als CSV herunterladen</button>
+          </div>
+          <div id="planStatus" class="muted"></div>
+        </div>
+      </div>
+
+      <div id="panel-groups" class="tab-content" style="display:none;">
+        <h2>Gruppen-Generator</h2>
+        <div class="stack">
+          <div>
+            <label>Größe wählen</label>
+            <div class="row">
+              <input type="radio" id="groupSizeFixed" name="groupSizeMode" value="fixed" checked>
+              <label for="groupSizeFixed">Feste Gruppengröße</label>
+              <input type="radio" id="groupSizeMax" name="groupSizeMode" value="max">
+              <label for="groupSizeMax">Maximale Gruppengröße</label>
+            </div>
+          </div>
+          <div id="fixedGroupSize" class="stack">
+            <label>Anzahl Schüler pro Gruppe</label>
+            <input type="number" id="groupSize" value="3" min="1">
+          </div>
+          <div id="maxGroupSize" class="stack" style="display:none;">
+            <label>Maximale Anzahl Schüler pro Gruppe</label>
+            <input type="number" id="maxSize" value="4" min="1">
+          </div>
+        </div>
+        <div class="spacer"></div>
+        <div class="stack">
+          <label>Regeln hinzufügen</label>
+          <div class="cols">
+            <div class="row" style="align-items:flex-end;">
+              <div style="flex:1">
+                <label>Müssen zusammen</label>
+                <div class="row">
+                  <select id="gMustA"></select>
+                  <select id="gMustB"></select>
+                </div>
+              </div>
+              <button class="btn secondary" id="gAddMust">Paar hinzufügen</button>
+            </div>
+            <div class="row" style="align-items:flex-end;">
+              <div style="flex:1">
+                <label>Dürfen nicht zusammen</label>
+                <div class="row">
+                  <select id="gNotA"></select>
+                  <select id="gNotB"></select>
+                </div>
+              </div>
+              <button class="btn danger" id="gAddNot">Paar hinzufügen</button>
+            </div>
+          </div>
+          <div>
+            <div id="gMustList"></div>
+            <div id="gNotList"></div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="row">
+            <button class="btn" id="genGroups">Gruppen generieren</button>
+          </div>
+          <div id="groupsStatus" class="muted"></div>
+        </div>
+      </div>
+    </section>
+    
+    <section class="card full-width">
+      <h2>Ergebnis</h2>
+      <div class="content">
+        <div id="resultHint" class="hint">Das Ergebnis erscheint hier.</div>
+        <div id="result"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+// ----------------- State -----------------
+let students = [];
+let mustPairs = [];
+let notPairs = [];
+let gMustPairs = [];
+let gNotPairs = [];
+let lastPlan = null;
+let lastGroups = null;
+let audioContext = null;
+
+// Utility: trim + collapse whitespace
+const norm = s => (s || "").toString().trim().replace(/\s+/g, " ");
+
+// Canonicalizes a pair by sorting the names alphabetically to ensure uniqueness
+function canonicalPair(a, b) {
+    const names = [norm(a), norm(b)].sort();
+    return { a: names[0], b: names[1] };
+}
+
+// Checks if a canonical pair already exists in the list
+function pairExists(list, a, b) {
+    const canonical = canonicalPair(a, b);
+    return list.some(p => p.a === canonical.a && p.b === canonical.b);
+}
+
+// Adds a canonical pair to a list if it doesn't already exist
+function addPair(list, a, b) {
+    const canonical = canonicalPair(a, b);
+    if (canonical.a && canonical.b && canonical.a !== canonical.b && !pairExists(list, canonical.a, canonical.b)) {
+        list.push(canonical);
+        list.sort((p1, p2) => p1.a.localeCompare(p2.a));
+        return true;
+    }
+    return false;
+}
+
+// Build select options from students
+function refreshSelects() {
+  const selects = [document.getElementById("mustA"), document.getElementById("mustB"),
+                   document.getElementById("notA"), document.getElementById("notB"),
+                   document.getElementById("gMustA"), document.getElementById("gMustB"),
+                   document.getElementById("gNotA"), document.getElementById("gNotB")];
+  for (const sel of selects) {
+    const prev = sel.value;
+    sel.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = ""; opt0.textContent = "— wählen —";
+    sel.appendChild(opt0);
+    students.forEach(name => {
+      const o = document.createElement("option");
+      o.value = name; o.textContent = name;
+      sel.appendChild(o);
+    });
+    sel.value = prev || "";
+  }
+}
+
+// Render the list of added students
+function renderStudentList() {
+  const listEl = document.getElementById("studentsList");
+  if (students.length === 0) {
+    listEl.innerHTML = "Keine Schüler hinzugefügt.";
+    return;
+  }
+  listEl.innerHTML = students.map((name, idx) => {
+    return `<span class="pill" style="margin-right: 4px; margin-top: 4px;">${name} <span style="cursor: pointer;" onclick="removeStudent(${idx})">×</span></span>`;
+  }).join('');
+}
+
+// Function to remove a student
+function removeStudent(index) {
+  const removedName = students[index];
+  students.splice(index, 1);
+  mustPairs = mustPairs.filter(p => p.a !== removedName && p.b !== removedName);
+  notPairs = notPairs.filter(p => p.a !== removedName && p.b !== removedName);
+  gMustPairs = gMustPairs.filter(p => p.a !== removedName && p.b !== removedName);
+  gNotPairs = gNotPairs.filter(p => p.a !== removedName && p.b !== removedName);
+  renderStudentList();
+  refreshSelects();
+  renderPairs();
+}
+
+// Add student from input field
+document.getElementById("addStudent").addEventListener("click", () => {
+  const input = document.getElementById("studentInput");
+  const name = norm(input.value);
+  if (name && !students.includes(name)) {
+    students.push(name);
+    students.sort();
+    input.value = "";
+    renderStudentList();
+    refreshSelects();
+  } else if (name) {
+    setStatus("Dieser Schüler ist bereits in der Liste.", "error", "planStatus");
+  }
+});
+
+// Allow adding a student by pressing Enter
+document.getElementById("studentInput").addEventListener("keypress", (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById("addStudent").click();
+  }
+});
+
+// Render pairs (Sitzplan & Gruppen)
+function renderPairs() {
+  const mustList = document.getElementById("mustList");
+  const notList  = document.getElementById("notList");
+  const gMustList = document.getElementById("gMustList");
+  const gNotList = document.getElementById("gNotList");
+
+  // Helper function to render a list of pairs
+  const renderList = (list, element, title, symbol, isDanger = false) => {
+    element.innerHTML = "";
+    if (list.length) {
+      const label = document.createElement("div");
+      label.style.marginTop = "8px";
+      label.innerHTML = `<b>${title}:</b>`;
+      element.appendChild(label);
+    }
+    list.forEach((p, idx) => {
+      const span = document.createElement("span");
+      span.className = "pair";
+      if (isDanger) {
+        span.style.background = "#fff7f7";
+        span.style.borderColor = "#ffd6d6";
+        span.style.color = "#7f1d1d";
+      }
+      span.textContent = `${p.a} ${symbol} ${p.b}`;
+      const x = document.createElement("span");
+      x.className = "x"; x.textContent = "×";
+      x.title = "Entfernen";
+      x.onclick = () => { list.splice(idx, 1); renderPairs(); };
+      span.appendChild(x);
+      element.appendChild(span);
+    });
+  };
+
+  renderList(mustPairs, mustList, "MUSS-Paare (horizontal)", "↔");
+  renderList(notPairs, notList, "NICHT-Paare (horiz./vert.)", "∥", true);
+  renderList(gMustPairs, gMustList, "Müssen zusammen", "↔");
+  renderList(gNotPairs, gNotList, "Dürfen nicht zusammen", "∥", true);
+}
+
+// Parse CSV (very simple; supports quoted cells)
+function parseCSV(text) {
+  const rows = [];
+  let i = 0, cur = "", inQ = false, row = [];
+  while (i < text.length) {
+    const ch = text[i++];
+    if (inQ) {
+      if (ch === '"') {
+        if (text[i] === '"') { cur += '"'; i++; }
+        else inQ = false;
+      } else cur += ch;
+    } else {
+      if (ch === '"') inQ = true;
+      else if (ch === ",") { row.push(cur); cur = ""; }
+      else if (ch === "\n" || ch === "\r") {
+        if (cur !== "" || row.length) { row.push(cur); rows.push(row); row = []; cur = ""; }
+        if (ch === "\r" && text[i] === "\n") i++;
+      } else cur += ch;
+    }
+  }
+  if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// Handle CSV/TXT file upload
+document.getElementById("studentsFile").addEventListener("change", (e) => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = reader.result;
+    let names = [];
+    let tempMust = [];
+    let tempNot = [];
+
+    const rows = parseCSV(text);
+    if (rows.length === 1 && rows[0].length === 1) {
+      names = norm(text).split(/\n+/).map(norm).filter(Boolean);
+    } else {
+      const header = rows[0].map(h => norm(h).toLowerCase());
+      let nameIdx = header.indexOf("name");
+      if (nameIdx === -1) nameIdx = header.indexOf("schüler");
+      if (nameIdx === -1) {
+        names = rows.map(r => norm(r[0])).filter(Boolean);
+      } else {
+        names = rows.slice(1).map(r => norm(r[nameIdx])).filter(Boolean);
+        const mustIdx = header.indexOf("must_with");
+        const notIdx  = header.indexOf("must_not_with");
+        rows.slice(1).forEach(r => {
+          const a = norm(r[nameIdx]);
+          if (!a) return;
+          if (mustIdx >= 0 && r[mustIdx]) {
+            norm(r[mustIdx]).split(/[;|,]+/).map(norm).filter(Boolean).forEach(b => tempMust.push({a, b}));
+          }
+          if (notIdx >= 0 && r[notIdx]) {
+            norm(r[notIdx]).split(/[;|,]+/).map(norm).filter(Boolean).forEach(b => tempNot.push({a, b}));
+          }
+        });
+      }
+    }
+    
+    mustPairs = [];
+    notPairs = [];
+    tempMust.forEach(p => addPair(mustPairs, p.a, p.b));
+    tempNot.forEach(p => addPair(notPairs, p.a, p.b));
+
+    students = Array.from(new Set(names));
+    students.sort();
+    refreshSelects();
+    renderStudentList();
+    renderPairs();
+    setStatus(`Geladen: ${students.length} Schüler aus Datei.`, "success", "planStatus");
+  };
+  reader.readAsText(f, "utf-8");
+});
+
+// Add pair buttons (Sitzplan)
+document.getElementById("addMust").addEventListener("click", () => {
+  const a = document.getElementById("mustA").value;
+  const b = document.getElementById("mustB").value;
+  addPair(mustPairs, a, b);
+  renderPairs();
+});
+document.getElementById("addNot").addEventListener("click", () => {
+  const a = document.getElementById("notA").value;
+  const b = document.getElementById("notB").value;
+  addPair(notPairs, a, b);
+  renderPairs();
+});
+
+// Add pair buttons (Gruppen)
+document.getElementById("gAddMust").addEventListener("click", () => {
+  const a = document.getElementById("gMustA").value;
+  const b = document.getElementById("gMustB").value;
+  addPair(gMustPairs, a, b);
+  renderPairs();
+});
+document.getElementById("gAddNot").addEventListener("click", () => {
+  const a = document.getElementById("gNotA").value;
+  const b = document.getElementById("gNotB").value;
+  addPair(gNotPairs, a, b);
+  renderPairs();
+});
+
+// Function to play a simple beep sound
+function playBeepSound() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.type = 'sine';
+  oscillator.frequency.value = 440; // A4
+  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+  gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.05);
+  gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
+
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.2);
+}
+
+// Random student picker (mit Pause und Sound)
+document.getElementById("pickRandom").addEventListener("click", () => {
+  if (!students.length) {
+    document.getElementById("randomOut").textContent = "Keine Schüler in der Liste.";
+    return;
+  }
+  
+  // Zeige "Zufälligen Schüler auswählen" als Lade-Text
+  document.getElementById("randomOut").textContent = `🎲 Auswählen...`;
+  
+  // Soundeffekt abspielen
+  playBeepSound();
+
+  // 500ms warten, dann das Ergebnis anzeigen
+  setTimeout(() => {
+    const pick = students[Math.floor(Math.random() * students.length)];
+    document.getElementById("randomOut").textContent = `Zufällig ausgewählt: ${pick}`;
+  }, 500);
+});
+
+// ----------------- Algorithm -----------------
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i=a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Sitzplan functions
+// Checks for horizontal adjacency (same row, adjacent columns)
+function isHorizAdj(a, b) { return a && b && a.row === b.row && Math.abs(a.col - b.col) === 1; }
+// Checks for vertical adjacency (same column, adjacent rows)
+function isVertAdj(a, b)  { return a && b && a.col === b.col && Math.abs(a.row - b.row) === 1; }
+// Checks for diagonal adjacency
+function isDiagAdj(a, b)  { return a && b && Math.abs(a.row - b.row) === 1 && Math.abs(a.col - b.col) === 1; }
+
+// Creates a flat array of seat objects based on the layout string
+function createSeats(layoutString) {
+  const seatCounts = layoutString.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0);
+  const seats = [];
+  let row = 0;
+  for (const count of seatCounts) {
+    for (let col = 0; col < count; col++) {
+      seats.push({ row, col, name: "" });
+    }
+    row++;
+  }
+  return seats;
+}
+
+function generatePlanOnce(students, seats) {
+  const names = shuffle(students);
+  const plan = [...seats];
+  for (let i = 0; i < names.length; i++) {
+    if (i < plan.length) {
+      plan[i].name = names[i];
+    }
+  }
+  return plan;
+}
+
+function validatePlan(plan, mustPairs, notPairs, forbidDiagonal) {
+  const pos = new Map();
+  for (const cell of plan) if (cell.name) pos.set(cell.name, cell);
+
+  for (const {a,b} of mustPairs) {
+    const A = pos.get(a), B = pos.get(b);
+    if (!A || !B) return false;
+    if (!isHorizAdj(A, B)) return false;
+  }
+  for (const {a,b} of notPairs) {
+    const A = pos.get(a), B = pos.get(b);
+    if (!A || !B) continue;
+    if (isHorizAdj(A, B) || isVertAdj(A, B)) return false;
+    if (forbidDiagonal && isDiagAdj(A, B)) return false;
+  }
+  return true;
+}
+
+function setStatus(text, kind, targetId) {
+  const el = document.getElementById(targetId);
+  el.className = kind;
+  el.textContent = text;
+}
+
+// Render grid for irregular layout
+function renderPlan(plan) {
+  const result = document.getElementById("result");
+  result.innerHTML = "";
+  document.getElementById("resultHint").style.display = "none";
+  
+  // Group seats by row
+  const rowsMap = new Map();
+  plan.forEach(cell => {
+    if (!rowsMap.has(cell.row)) {
+      rowsMap.set(cell.row, []);
+    }
+    rowsMap.get(cell.row).push(cell);
+  });
+  
+  // Render each row as its own grid
+  rowsMap.forEach((seatsInRow, rowIdx) => {
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "grid";
+    rowDiv.style.marginBottom = "20px";
+    rowDiv.style.gridTemplateColumns = `repeat(${seatsInRow.length}, minmax(80px, 1fr))`;
+    
+    seatsInRow.forEach(cell => {
+      const d = document.createElement("div");
+      d.className = "seat";
+      d.innerHTML = cell.name ? `<div><div>${cell.name}</div><div class="hint">R${cell.row+1} · P${cell.col+1}</div></div>` : "<span class='muted'>frei</span>";
+      rowDiv.appendChild(d);
+    });
+    result.appendChild(rowDiv);
+  });
+}
+
+// Download CSV
+function downloadCSV(plan) {
+  const lines = [["row","col","name"]].concat(plan.map(c => [c.row+1, c.col+1, c.name || ""]));
+  const csv = lines.map(r => r.map(v => `"${(v??"").toString().replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sitzplan.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// Generate button (Sitzplan)
+document.getElementById("genPlan").addEventListener("click", () => {
+  const layoutType = document.querySelector('input[name="layoutType"]:checked').value;
+  let seats = [];
+  const studentsCount = students.length;
+
+  if (layoutType === 'regular') {
+    const rows = parseInt(document.getElementById("rows").value, 10) || 1;
+    const cols = parseInt(document.getElementById("cols").value, 10) || 1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        seats.push({ row: r, col: c, name: "" });
+      }
+    }
+  } else { // irregular
+    const layoutString = document.getElementById("roomLayout").value;
+    seats = createSeats(layoutString);
+  }
+  
+  const totalSeats = seats.length;
+
+  if (!studentsCount) { setStatus("Bitte zuerst Schüler eingeben oder Datei laden.", "error", "planStatus"); return; }
+  if (totalSeats < studentsCount) { setStatus(`Zu wenig Plätze (${totalSeats}) für ${studentsCount} Schüler.`, "error", "planStatus"); return; }
+  if (totalSeats === 0) { setStatus("Ungültiges Layout. Bitte die Plätze pro Reihe/Reihe & Spalte eingeben.", "error", "planStatus"); return; }
+
+  setStatus("Suche gültigen Plan …", "muted", "planStatus");
+  const MAX_ATTEMPTS = 5000;
+  let plan = null;
+  for (let t=0; t<MAX_ATTEMPTS; t++) {
+    const candidate = generatePlanOnce(students, seats);
+    if (validatePlan(candidate, mustPairs, notPairs, forbidDiagonal)) { plan = candidate; break; }
+  }
+
+  if (!plan) {
+    setStatus(`Keine gültige Anordnung gefunden (Versuche: ${MAX_ATTEMPTS}). Regeln lockern oder Plätze erhöhen.`, "error", "planStatus");
+    document.getElementById("downloadCsv").disabled = true;
+    return;
+  }
+
+  lastPlan = plan;
+  renderPlan(plan);
+  setStatus(`Plan erzeugt. Plätze: ${totalSeats}, Schüler: ${studentsCount}.`, "success", "planStatus");
+  document.getElementById("downloadCsv").disabled = false;
+});
+
+document.getElementById("downloadCsv").addEventListener("click", () => {
+  if (lastPlan) downloadCSV(lastPlan);
+});
+
+
+// Gruppen functions
+function generateGroupsOnce(size){
+  if (size < 1) size = 1;
+  const shuffled = shuffle(students);
+  const groups = [];
+  for (let i = 0; i < shuffled.length; i += size) {
+    groups.push(shuffled.slice(i, i + size));
+  }
+  return groups;
+}
+
+// New logic for generating groups based on max size
+function generateGroupsWithMaxSize(maxSize) {
+    const studentsCount = students.length;
+    if (maxSize < 1) maxSize = 1;
+    if (studentsCount <= 0) return [];
+    
+    // Calculate the number of groups needed based on the max size
+    const numGroups = Math.ceil(studentsCount / maxSize);
+    const shuffledStudents = shuffle(students);
+    const groups = [];
+    
+    // Distribute students as evenly as possible
+    let studentIndex = 0;
+    for (let i = 0; i < numGroups; i++) {
+        const group = [];
+        const studentsRemaining = studentsCount - studentIndex;
+        const groupsRemaining = numGroups - i;
+        // Calculate a fair share for this group
+        const groupSize = Math.ceil(studentsRemaining / groupsRemaining);
+        
+        for (let j = 0; j < groupSize && studentIndex < studentsCount; j++) {
+            group.push(shuffledStudents[studentIndex++]);
+        }
+        groups.push(group);
+    }
+    return groups;
+}
+
+
+function validateGroups(groups){
+  for (const {a, b} of gMustPairs) {
+    if (!groups.some(g => g.includes(a) && g.includes(b))) return false;
+  }
+  for (const {a, b} of gNotPairs) {
+    if (groups.some(g => g.includes(a) && g.includes(b))) return false;
+  }
+  return true;
+}
+
+// Render groups
+function renderGroups(groups) {
+  const result = document.getElementById("result");
+  result.innerHTML = "";
+  groups.forEach((g, i) => {
+    const d = document.createElement("div");
+    d.className = "group";
+    d.innerHTML = `<b>Gruppe ${i+1}</b><br>` + g.join("<br>");
+    result.appendChild(d);
+  });
+  document.getElementById("resultHint").style.display = "none";
+}
+
+// Generate button (Gruppen)
+document.getElementById("genGroups").addEventListener("click", () => {
+  const groupSizeMode = document.querySelector('input[name="groupSizeMode"]:checked').value;
+  let groups = null;
+  
+  if (!students.length) {
+    setStatus("Bitte zuerst Schüler eingeben oder Datei laden.", "error", "groupsStatus");
+    return;
+  }
+  
+  setStatus("Suche gültige Gruppen …", "muted", "groupsStatus");
+  
+  const MAX_ATTEMPTS = 2000;
+  for (let t = 0; t < MAX_ATTEMPTS; t++) {
+    let candidate;
+    if (groupSizeMode === 'fixed') {
+        const size = parseInt(document.getElementById("groupSize").value, 10);
+        if (size > students.length || size < 1) {
+          setStatus("Gruppengröße ist ungültig.", "error", "groupsStatus");
+          return;
+        }
+        candidate = generateGroupsOnce(size);
+    } else { // max
+        const maxSize = parseInt(document.getElementById("maxSize").value, 10);
+        if (maxSize > students.length || maxSize < 1) {
+          setStatus("Maximale Gruppengröße ist ungültig.", "error", "groupsStatus");
+          return;
+        }
+        candidate = generateGroupsWithMaxSize(maxSize);
+    }
+    
+    if (validateGroups(candidate)) {
+      groups = candidate;
+      break;
+    }
+  }
+
+  if (!groups) {
+    setStatus("Keine gültige Gruppierung gefunden. Regeln lockern.", "error", "groupsStatus");
+    return;
+  }
+  
+  lastGroups = groups;
+  renderGroups(groups);
+  setStatus(`Gruppen erzeugt. Anzahl: ${groups.length}, Schüler: ${students.length}.`, "success", "groupsStatus");
+});
+
+
+// Tab functionality
+document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  tab.classList.add("active");
+  
+  document.querySelectorAll(".tab-content").forEach(p => p.style.display = "none");
+  const activeTabId = "panel-" + tab.dataset.tab;
+  document.getElementById(activeTabId).style.display = "block";
+  
+  // Clear result when switching tabs
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("resultHint").style.display = "block";
+}));
+
+// Add event listeners for the new radio buttons to toggle visibility
+document.getElementById("layoutRegular").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        document.getElementById("regularLayout").style.display = "grid";
+        document.getElementById("irregularLayout").style.display = "none";
+    }
+});
+document.getElementById("layoutIrregular").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        document.getElementById("regularLayout").style.display = "none";
+        document.getElementById("irregularLayout").style.display = "grid";
+    }
+});
+
+document.getElementById("groupSizeFixed").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        document.getElementById("fixedGroupSize").style.display = "grid";
+        document.getElementById("maxGroupSize").style.display = "none";
+    }
+});
+document.getElementById("groupSizeMax").addEventListener("change", (e) => {
+    if (e.target.checked) {
+        document.getElementById("fixedGroupSize").style.display = "none";
+        document.getElementById("maxGroupSize").style.display = "grid";
+    }
+});
+
+
+// Initialize
+refreshSelects();
+renderPairs();
+renderStudentList();
+</script>
+</body>
+</html>
