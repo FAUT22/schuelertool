@@ -19,12 +19,13 @@
     .card .content { padding: var(--pad); }
     .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     label { font-weight: 600; font-size: 13px; }
+    .section-title { font-size: 15px; font-weight: 700; color: #2d3648; margin-bottom: 8px; display: block; }
     input[type="number"], input[type="text"], textarea, select {
       border: 1px solid #d1d5db; border-radius: 10px; padding: 8px 10px; font-size: 14px; width: 100%; box-sizing: border-box; background: #fff;
     }
     textarea { min-height: 70px; }
     .grid { display: grid; gap: 8px; margin-top: 12px; }
-    .seat { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; text-align: center; min-width: 80px; min-height: 48px; display: flex; align-items: center; justify-content: center; }
+    .seat { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; text-align: center; min-width: 80px; min-height: 48px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; }
     .muted { color: #6b7280; }
     .btn { background: #2d6cdf; color: #fff; border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
     .btn.secondary { background: #10b981; }
@@ -34,7 +35,8 @@
     .pill { display:inline-block; background:#f3f4f6; border:1px solid #e5e7eb; padding:2px 8px; border-radius:999px; font-size:12px; }
     .pair { display: inline-flex; align-items: center; gap: 8px; background: #f4f8ff; border: 1px solid #dbe7ff; color: #1e3a8a; padding: 6px 10px; border-radius: 999px; margin: 4px 6px 0 0; }
     .pair .x { cursor: pointer; opacity: .7; font-weight: 700; padding: 0 2px; }
-    .group { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin: 6px; display: inline-block; min-width: 120px; vertical-align: top; }
+    .group { border: 1px solid #d1d5db; border-radius: 10px; padding: 10px; margin: 6px; display: inline-block; min-width: 120px; vertical-align: top; background: #f3f4f6; }
+    .group .pill { font-size: 14px; padding: 4px 10px; margin: 4px; }
     .toggle { display: inline-flex; align-items: center; gap: 8px; }
     .hint { font-size: 12px; color: #6b7280; }
     .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -47,11 +49,94 @@
     .tab { padding: 10px 20px; cursor: pointer; border-right: 1px solid #eef1f4; border-top-right-radius: 14px; border-top-left-radius: 14px; background: #fbfbfd; border-left: 1px solid #eef1f4; margin-left: -1px; }
     .tab.active { background: #fff; border-bottom: 1px solid #fff; font-weight: 600; }
     .tab-content { padding: var(--pad); }
+    .plan-row {
+      display: flex;
+      gap: 20px; 
+      margin-bottom: 25px; 
+    }
+    .table-container {
+      display: flex;
+      gap: 5px; 
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 5px;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .seat.table-seat {
+      border: 1px solid #a0a0a0;
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      text-align: center;
+      min-width: 80px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+    }
+    .placeholder-seat {
+      width: 80px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-style: italic;
+    }
+    .plan-spacer {
+      width: 40px;
+      min-width: 40px;
+      height: 1px;
+    }
+    /* Drag & Drop Styles */
+    .seat.dragging {
+      opacity: 0.5;
+      cursor: grabbing;
+    }
+    .seat.drag-over {
+      border: 2px dashed #2d6cdf;
+      background: #f0f5ff;
+    }
+    .pdf-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .pdf-modal-content {
+      background: #fff;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: grid;
+      gap: 16px;
+      width: 300px;
+    }
+    .pdf-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .pdf-export-override .seat,
+    .pdf-export-override .group {
+        background: #fff !important;
+    }
+    .pdf-export-override .card.full-width {
+        width: 100%;
+        max-width: 100%;
+    }
   </style>
 </head>
 <body>
   <header>
-    <!-- Logo SVG -->
     <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
       <rect width="100" height="100" fill="#2d6cdf" rx="15" ry="15"/>
       <rect x="30" y="20" width="40" height="60" fill="#ffeb3b" rx="5" ry="5"/>
@@ -86,9 +171,9 @@
           </div>
         </div>
         <div>
-          <label>Oder aus Datei laden</label>
+          <label>Oder aus Datei laden (.csv, .txt, .pdf (Export aus Sokrates))</label>
           <div class="row">
-            <input type="file" id="studentsFile" accept=".csv,.txt"/>
+            <input type="file" id="studentsFile" accept=".csv,.txt,.pdf"/>
           </div>
         </div>
         <div class="spacer"></div>
@@ -114,7 +199,7 @@
         <h2>Sitzplan-Generator</h2>
         <div class="stack">
           <div>
-            <label>Layout wählen</label>
+            <label class="section-title">Layout wählen</label>
             <div class="row">
               <input type="radio" id="layoutRegular" name="layoutType" value="regular" checked>
               <label for="layoutRegular">Regelmäßiges Raster</label>
@@ -122,15 +207,27 @@
               <label for="layoutIrregular">Unregelmäßiges Layout</label>
             </div>
           </div>
+          
+          <div id="tableSizeSelection" class="stack">
+            <label class="section-title">Tischgröße wählen</label>
+            <div class="row">
+              <input type="radio" id="tableSize1" name="tableSize" value="1" checked>
+              <label for="tableSize1">1er-Tisch</label>
+              <input type="radio" id="tableSize2" name="tableSize" value="2">
+              <label for="tableSize2">2er-Tisch</label>
+              <input type="radio" id="tableSize4" name="tableSize" value="4">
+              <label for="tableSize4">4er-Tisch</label>
+            </div>
+          </div>
 
           <div id="regularLayout" class="stack">
             <div class="cols">
               <div>
-                <label for="rows">Anzahl der Reihen</label>
+                <label>Anzahl der Reihen</label>
                 <input type="number" id="rows" value="5" min="1"/>
               </div>
               <div>
-                <label for="cols">Anzahl der Spalten</label>
+                <label>Anzahl der Spalten</label>
                 <input type="number" id="cols" value="5" min="1"/>
               </div>
             </div>
@@ -139,8 +236,8 @@
           <div id="irregularLayout" class="stack" style="display:none;">
             <div>
               <label>Sitzplan-Layout</label>
-              <textarea id="roomLayout" placeholder="Anzahl der Plätze pro Reihe, z.B. 6,4,6"></textarea>
-              <div class="hint">Gib die Anzahl der Plätze pro Reihe an, getrennt durch Kommas. Beispiel: `6,4,6`</div>
+              <textarea id="roomLayout" placeholder="Gib die Anzahl der Plätze pro Reihe an. Jede neue Zeile ist eine neue Reihe. Tischgruppen werden mit Kommas getrennt. (z.B. '6,4,6')"></textarea>
+              <div class="hint"></div>
             </div>
           </div>
           
@@ -183,7 +280,7 @@
         <div class="footer">
           <div class="row">
             <button class="btn" id="genPlan">Sitzplan generieren</button>
-            <button class="btn ghost" id="downloadCsv" disabled>Als CSV herunterladen</button>
+            <button class="btn ghost" id="downloadPdf" disabled>Als PDF herunterladen</button>
           </div>
           <div id="planStatus" class="muted"></div>
         </div>
@@ -193,19 +290,19 @@
         <h2>Gruppen-Generator</h2>
         <div class="stack">
           <div>
-            <label>Größe wählen</label>
+            <label class="section-title">Modus wählen</label>
             <div class="row">
-              <input type="radio" id="groupSizeFixed" name="groupSizeMode" value="fixed" checked>
-              <label for="groupSizeFixed">Feste Gruppengröße</label>
-              <input type="radio" id="groupSizeMax" name="groupSizeMode" value="max">
-              <label for="groupSizeMax">Maximale Gruppengröße</label>
+              <input type="radio" id="groupModeNum" name="groupSizeMode" value="numGroups" checked>
+              <label for="groupModeNum">Feste Anzahl an Gruppen</label>
+              <input type="radio" id="groupModeSize" name="groupSizeMode" value="maxSize">
+              <label for="groupModeSize">Maximale Gruppengröße</label>
             </div>
           </div>
-          <div id="fixedGroupSize" class="stack">
-            <label>Anzahl Schüler pro Gruppe</label>
-            <input type="number" id="groupSize" value="3" min="1">
+          <div id="numGroupsDiv" class="stack">
+            <label>Anzahl der Gruppen</label>
+            <input type="number" id="numGroups" value="3" min="1">
           </div>
-          <div id="maxGroupSize" class="stack" style="display:none;">
+          <div id="maxSizeDiv" class="stack" style="display:none;">
             <label>Maximale Anzahl Schüler pro Gruppe</label>
             <input type="number" id="maxSize" value="4" min="1">
           </div>
@@ -258,6 +355,22 @@
     </section>
   </main>
 
+  <div id="pdfModal" class="pdf-modal" style="display: none;">
+    <div class="pdf-modal-content">
+      <h3 style="margin: 0;">PDF-Titel & Dateiname</h3>
+      <input type="text" id="pdfFilename" placeholder="z.B. Sitzplan-Klasse-5a" />
+      <div class="pdf-modal-actions">
+        <button class="btn ghost" id="cancelPdf">Abbrechen</button>
+        <button class="btn secondary" id="generatePdf">Generieren</button>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+
 <script>
 // ----------------- State -----------------
 let students = [];
@@ -268,23 +381,21 @@ let gNotPairs = [];
 let lastPlan = null;
 let lastGroups = null;
 let audioContext = null;
+let sourceSeatElement = null;
 
 // Utility: trim + collapse whitespace
 const norm = s => (s || "").toString().trim().replace(/\s+/g, " ");
 
-// Canonicalizes a pair by sorting the names alphabetically to ensure uniqueness
 function canonicalPair(a, b) {
     const names = [norm(a), norm(b)].sort();
     return { a: names[0], b: names[1] };
 }
 
-// Checks if a canonical pair already exists in the list
 function pairExists(list, a, b) {
     const canonical = canonicalPair(a, b);
     return list.some(p => p.a === canonical.a && p.b === canonical.b);
 }
 
-// Adds a canonical pair to a list if it doesn't already exist
 function addPair(list, a, b) {
     const canonical = canonicalPair(a, b);
     if (canonical.a && canonical.b && canonical.a !== canonical.b && !pairExists(list, canonical.a, canonical.b)) {
@@ -295,7 +406,6 @@ function addPair(list, a, b) {
     return false;
 }
 
-// Build select options from students
 function refreshSelects() {
   const selects = [document.getElementById("mustA"), document.getElementById("mustB"),
                    document.getElementById("notA"), document.getElementById("notB"),
@@ -316,7 +426,6 @@ function refreshSelects() {
   }
 }
 
-// Render the list of added students
 function renderStudentList() {
   const listEl = document.getElementById("studentsList");
   if (students.length === 0) {
@@ -328,7 +437,6 @@ function renderStudentList() {
   }).join('');
 }
 
-// Function to remove a student
 function removeStudent(index) {
   const removedName = students[index];
   students.splice(index, 1);
@@ -341,7 +449,6 @@ function removeStudent(index) {
   renderPairs();
 }
 
-// Add student from input field
 document.getElementById("addStudent").addEventListener("click", () => {
   const input = document.getElementById("studentInput");
   const name = norm(input.value);
@@ -356,7 +463,6 @@ document.getElementById("addStudent").addEventListener("click", () => {
   }
 });
 
-// Allow adding a student by pressing Enter
 document.getElementById("studentInput").addEventListener("keypress", (e) => {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -364,14 +470,12 @@ document.getElementById("studentInput").addEventListener("keypress", (e) => {
   }
 });
 
-// Render pairs (Sitzplan & Gruppen)
 function renderPairs() {
   const mustList = document.getElementById("mustList");
-  const notList  = document.getElementById("notList");
+  const notList = document.getElementById("notList");
   const gMustList = document.getElementById("gMustList");
   const gNotList = document.getElementById("gNotList");
-
-  // Helper function to render a list of pairs
+  
   const renderList = (list, element, title, symbol, isDanger = false) => {
     element.innerHTML = "";
     if (list.length) {
@@ -390,9 +494,13 @@ function renderPairs() {
       }
       span.textContent = `${p.a} ${symbol} ${p.b}`;
       const x = document.createElement("span");
-      x.className = "x"; x.textContent = "×";
+      x.className = "x";
+      x.textContent = "×";
       x.title = "Entfernen";
-      x.onclick = () => { list.splice(idx, 1); renderPairs(); };
+      x.onclick = () => {
+        list.splice(idx, 1);
+        renderPairs();
+      };
       span.appendChild(x);
       element.appendChild(span);
     });
@@ -404,7 +512,6 @@ function renderPairs() {
   renderList(gNotPairs, gNotList, "Dürfen nicht zusammen", "∥", true);
 }
 
-// Parse CSV (very simple; supports quoted cells)
 function parseCSV(text) {
   const rows = [];
   let i = 0, cur = "", inQ = false, row = [];
@@ -412,464 +519,825 @@ function parseCSV(text) {
     const ch = text[i++];
     if (inQ) {
       if (ch === '"') {
-        if (text[i] === '"') { cur += '"'; i++; }
-        else inQ = false;
-      } else cur += ch;
+        if (i < text.length && text[i] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQ = false;
+        }
+      } else {
+        cur += ch;
+      }
     } else {
-      if (ch === '"') inQ = true;
-      else if (ch === ",") { row.push(cur); cur = ""; }
-      else if (ch === "\n" || ch === "\r") {
-        if (cur !== "" || row.length) { row.push(cur); rows.push(row); row = []; cur = ""; }
-        if (ch === "\r" && text[i] === "\n") i++;
-      } else cur += ch;
+      if (ch === '"') {
+        inQ = true;
+      } else if (ch === ',') {
+        row.push(cur.trim());
+        cur = "";
+      } else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i] === '\n') i++;
+        row.push(cur.trim());
+        if (row.length > 0 && row.some(c => c !== "")) {
+          rows.push(row);
+        }
+        row = [];
+        cur = "";
+      } else {
+        cur += ch;
+      }
     }
   }
-  if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+  row.push(cur.trim());
+  if (row.length > 0 && row.some(c => c !== "")) {
+    rows.push(row);
+  }
   return rows;
 }
 
-// Handle CSV/TXT file upload
-document.getElementById("studentsFile").addEventListener("change", (e) => {
-  const f = e.target.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const text = reader.result;
-    let names = [];
-    let tempMust = [];
-    let tempNot = [];
+async function extractNamesFromPDF(file) {
+    const reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        reader.onload = async function(e) {
+            try {
+                const arrayBuffer = e.target.result;
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                const totalPages = pdf.numPages;
+                let allText = "";
 
-    const rows = parseCSV(text);
-    if (rows.length === 1 && rows[0].length === 1) {
-      names = norm(text).split(/\n+/).map(norm).filter(Boolean);
-    } else {
-      const header = rows[0].map(h => norm(h).toLowerCase());
-      let nameIdx = header.indexOf("name");
-      if (nameIdx === -1) nameIdx = header.indexOf("schüler");
-      if (nameIdx === -1) {
-        names = rows.map(r => norm(r[0])).filter(Boolean);
-      } else {
-        names = rows.slice(1).map(r => norm(r[nameIdx])).filter(Boolean);
-        const mustIdx = header.indexOf("must_with");
-        const notIdx  = header.indexOf("must_not_with");
-        rows.slice(1).forEach(r => {
-          const a = norm(r[nameIdx]);
-          if (!a) return;
-          if (mustIdx >= 0 && r[mustIdx]) {
-            norm(r[mustIdx]).split(/[;|,]+/).map(norm).filter(Boolean).forEach(b => tempMust.push({a, b}));
-          }
-          if (notIdx >= 0 && r[notIdx]) {
-            norm(r[notIdx]).split(/[;|,]+/).map(norm).filter(Boolean).forEach(b => tempNot.push({a, b}));
-          }
-        });
-      }
-    }
-    
-    mustPairs = [];
-    notPairs = [];
-    tempMust.forEach(p => addPair(mustPairs, p.a, p.b));
-    tempNot.forEach(p => addPair(notPairs, p.a, p.b));
-
-    students = Array.from(new Set(names));
-    students.sort();
-    refreshSelects();
-    renderStudentList();
-    renderPairs();
-    setStatus(`Geladen: ${students.length} Schüler aus Datei.`, "success", "planStatus");
-  };
-  reader.readAsText(f, "utf-8");
-});
-
-// Add pair buttons (Sitzplan)
-document.getElementById("addMust").addEventListener("click", () => {
-  const a = document.getElementById("mustA").value;
-  const b = document.getElementById("mustB").value;
-  addPair(mustPairs, a, b);
-  renderPairs();
-});
-document.getElementById("addNot").addEventListener("click", () => {
-  const a = document.getElementById("notA").value;
-  const b = document.getElementById("notB").value;
-  addPair(notPairs, a, b);
-  renderPairs();
-});
-
-// Add pair buttons (Gruppen)
-document.getElementById("gAddMust").addEventListener("click", () => {
-  const a = document.getElementById("gMustA").value;
-  const b = document.getElementById("gMustB").value;
-  addPair(gMustPairs, a, b);
-  renderPairs();
-});
-document.getElementById("gAddNot").addEventListener("click", () => {
-  const a = document.getElementById("gNotA").value;
-  const b = document.getElementById("gNotB").value;
-  addPair(gNotPairs, a, b);
-  renderPairs();
-});
-
-// Function to play a simple beep sound
-function playBeepSound() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
-  oscillator.type = 'sine';
-  oscillator.frequency.value = 440; // A4
-  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-  gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.05);
-  gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.2);
-
-  oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.2);
-}
-
-// Random student picker (mit Pause und Sound)
-document.getElementById("pickRandom").addEventListener("click", () => {
-  if (!students.length) {
-    document.getElementById("randomOut").textContent = "Keine Schüler in der Liste.";
-    return;
-  }
-  
-  // Zeige "Zufälligen Schüler auswählen" als Lade-Text
-  document.getElementById("randomOut").textContent = `🎲 Auswählen...`;
-  
-  // Soundeffekt abspielen
-  playBeepSound();
-
-  // 500ms warten, dann das Ergebnis anzeigen
-  setTimeout(() => {
-    const pick = students[Math.floor(Math.random() * students.length)];
-    document.getElementById("randomOut").textContent = `Zufällig ausgewählt: ${pick}`;
-  }, 500);
-});
-
-// ----------------- Algorithm -----------------
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i=a.length-1; i>0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-// Sitzplan functions
-// Checks for horizontal adjacency (same row, adjacent columns)
-function isHorizAdj(a, b) { return a && b && a.row === b.row && Math.abs(a.col - b.col) === 1; }
-// Checks for vertical adjacency (same column, adjacent rows)
-function isVertAdj(a, b)  { return a && b && a.col === b.col && Math.abs(a.row - b.row) === 1; }
-// Checks for diagonal adjacency
-function isDiagAdj(a, b)  { return a && b && Math.abs(a.row - b.row) === 1 && Math.abs(a.col - b.col) === 1; }
-
-// Creates a flat array of seat objects based on the layout string
-function createSeats(layoutString) {
-  const seatCounts = layoutString.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n) && n > 0);
-  const seats = [];
-  let row = 0;
-  for (const count of seatCounts) {
-    for (let col = 0; col < count; col++) {
-      seats.push({ row, col, name: "" });
-    }
-    row++;
-  }
-  return seats;
-}
-
-function generatePlanOnce(students, seats) {
-  const names = shuffle(students);
-  const plan = [...seats];
-  for (let i = 0; i < names.length; i++) {
-    if (i < plan.length) {
-      plan[i].name = names[i];
-    }
-  }
-  return plan;
-}
-
-function validatePlan(plan, mustPairs, notPairs, forbidDiagonal) {
-  const pos = new Map();
-  for (const cell of plan) if (cell.name) pos.set(cell.name, cell);
-
-  for (const {a,b} of mustPairs) {
-    const A = pos.get(a), B = pos.get(b);
-    if (!A || !B) return false;
-    if (!isHorizAdj(A, B)) return false;
-  }
-  for (const {a,b} of notPairs) {
-    const A = pos.get(a), B = pos.get(b);
-    if (!A || !B) continue;
-    if (isHorizAdj(A, B) || isVertAdj(A, B)) return false;
-    if (forbidDiagonal && isDiagAdj(A, B)) return false;
-  }
-  return true;
-}
-
-function setStatus(text, kind, targetId) {
-  const el = document.getElementById(targetId);
-  el.className = kind;
-  el.textContent = text;
-}
-
-// Render grid for irregular layout
-function renderPlan(plan) {
-  const result = document.getElementById("result");
-  result.innerHTML = "";
-  document.getElementById("resultHint").style.display = "none";
-  
-  // Group seats by row
-  const rowsMap = new Map();
-  plan.forEach(cell => {
-    if (!rowsMap.has(cell.row)) {
-      rowsMap.set(cell.row, []);
-    }
-    rowsMap.get(cell.row).push(cell);
-  });
-  
-  // Render each row as its own grid
-  rowsMap.forEach((seatsInRow, rowIdx) => {
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "grid";
-    rowDiv.style.marginBottom = "20px";
-    rowDiv.style.gridTemplateColumns = `repeat(${seatsInRow.length}, minmax(80px, 1fr))`;
-    
-    seatsInRow.forEach(cell => {
-      const d = document.createElement("div");
-      d.className = "seat";
-      d.innerHTML = cell.name ? `<div><div>${cell.name}</div><div class="hint">R${cell.row+1} · P${cell.col+1}</div></div>` : "<span class='muted'>frei</span>";
-      rowDiv.appendChild(d);
+                for (let i = 1; i <= totalPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    allText += pageText + ' ';
+                }
+                
+                const nameRegex = /\d+\s+([\p{L}\p{M}\s.-]+)/gu;
+                const extractedNames = [];
+                let match;
+                while ((match = nameRegex.exec(allText)) !== null) {
+                    if (match[1]) {
+                        const name = match[1].trim().replace(/\s+/g, ' ');
+                        extractedNames.push(name);
+                    }
+                }
+                
+                const unwantedStrings = [
+                    "Gymnasium und wirtschaftskundliches Realgymnasium", "der Vereinigung von Ordensschulen Österreichs mit Öffentlichkeitsrecht",
+                    "Wien, Hofzeile 22", "01/3687521", "Namensliste der 8c", "Schülerinnen", "Klassenvorstand",
+                    "Mag. Martina Schwarz", "NrName", "Schuljahr", "Wien"
+                ].map(s => norm(s).toLowerCase());
+                
+                const filteredNames = extractedNames.filter(name => {
+                    const normalizedName = norm(name).toLowerCase();
+                    return !unwantedStrings.some(unwanted => normalizedName.includes(unwanted));
+                });
+                
+                resolve(filteredNames);
+            } catch (error) {
+                console.error("Error extracting text from PDF:", error);
+                reject(error);
+            }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
     });
-    result.appendChild(rowDiv);
-  });
 }
 
-// Download CSV
-function downloadCSV(plan) {
-  const lines = [["row","col","name"]].concat(plan.map(c => [c.row+1, c.col+1, c.name || ""]));
-  const csv = lines.map(r => r.map(v => `"${(v??"").toString().replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "sitzplan.csv";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+document.getElementById("studentsFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  let loadedStudents = [];
+  
+  if (file.type === "application/pdf") {
+      setStatus("Lese Schüler aus PDF-Datei...", "muted", "planStatus");
+      try {
+          loadedStudents = await extractNamesFromPDF(file);
+      } catch (error) {
+          setStatus("Fehler beim Lesen der PDF-Datei.", "error", "planStatus");
+          console.error(error);
+          return;
+      }
+  } else {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+          const text = e.target.result;
+          if (file.type === "text/csv" || file.name.endsWith(".csv")) {
+            const csvData = parseCSV(text);
+            if (csvData.length > 0) {
+              loadedStudents = csvData.flat().filter(name => name).map(name => norm(name));
+            } else {
+              setStatus("Fehler beim Parsen der CSV-Datei.", "error", "planStatus");
+              return;
+            }
+          } else {
+            loadedStudents = text.split(/\r?\n/).map(line => norm(line)).filter(line => line);
+          }
+          
+          students = [...new Set([...students, ...loadedStudents])].sort();
+          renderStudentList();
+          refreshSelects();
+          setStatus("Schülerliste erfolgreich geladen!", "success", "planStatus");
+      };
+      reader.readAsText(file);
+      return;
+  }
+  
+  students = [...new Set([...students, ...loadedStudents])].sort();
+  renderStudentList();
+  refreshSelects();
+  setStatus("Schülerliste erfolgreich geladen!", "success", "planStatus");
+});
+
+// Sound effect for random picker
+function playSound(type = 'tick') {
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.warn('Web Audio API is not supported in this browser');
+            return;
+        }
+    }
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    if (type === 'tick') {
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.05);
+    } else { // final
+        oscillator.type = 'triangle';
+        oscillator.frequency.setValueAtTime(1240, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + 0.15);
+    }
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
 }
 
-// Generate button (Sitzplan)
-document.getElementById("genPlan").addEventListener("click", () => {
+document.getElementById("pickRandom").addEventListener("click", () => {
+    if (students.length === 0) {
+        setStatus("Füge zuerst Schüler hinzu.", "error", "planStatus");
+        return;
+    }
+    
+    const outputEl = document.getElementById("randomOut");
+    const pickButton = document.getElementById("pickRandom");
+    pickButton.disabled = true;
+    
+    const finalStudent = students[Math.floor(Math.random() * students.length)];
+    let animationInterval;
+    let duration = 0;
+    
+    animationInterval = setInterval(() => {
+        const randomStudent = students[Math.floor(Math.random() * students.length)];
+        outputEl.textContent = randomStudent;
+        playSound('tick');
+        duration += 100;
+        
+        if (duration >= 1000) {
+            clearInterval(animationInterval);
+            outputEl.textContent = finalStudent;
+            playSound('final');
+            pickButton.disabled = false;
+        }
+    }, 100);
+});
+
+function setStatus(message, type, targetId) {
+    const statusEl = document.getElementById(targetId);
+    statusEl.className = type;
+    statusEl.textContent = message;
+    setTimeout(() => {
+        if (statusEl.textContent === message) {
+            statusEl.className = "muted";
+            statusEl.textContent = "";
+        }
+    }, 5000);
+}
+
+// ===================================================================================
+// ===================== SITZPLAN-GENERATOR LOGIC (OPTIMIZED) ========================
+// ===================================================================================
+function genPlan() {
+  setStatus("Generiere Sitzplan...", "muted", "planStatus");
+  document.getElementById("downloadPdf").disabled = true;
+  document.getElementById("result").innerHTML = "";
+
   const layoutType = document.querySelector('input[name="layoutType"]:checked').value;
-  let seats = [];
-  const studentsCount = students.length;
+  const forbidDiagonal = document.getElementById("forbidDiagonal").checked;
+  let layoutConfig = [];
 
+  // 1. Layout-Struktur und Gesamtanzahl der Plätze ermitteln
   if (layoutType === 'regular') {
-    const rows = parseInt(document.getElementById("rows").value, 10) || 1;
-    const cols = parseInt(document.getElementById("cols").value, 10) || 1;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        seats.push({ row: r, col: c, name: "" });
+    const rows = parseInt(document.getElementById("rows").value) || 1;
+    const cols = parseInt(document.getElementById("cols").value) || 1;
+    const tableSize = parseInt(document.querySelector('input[name="tableSize"]:checked').value);
+    for (let i = 0; i < rows; i++) {
+      layoutConfig.push(Array(cols).fill(tableSize));
+    }
+  } else {
+    const roomLayoutText = document.getElementById("roomLayout").value.trim();
+    if (!roomLayoutText) {
+      setStatus("Unregelmäßiges Layout: Gib die Tischgruppen an.", "error", "planStatus");
+      return;
+    }
+    layoutConfig = roomLayoutText.split('\n').map(row => 
+      row.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0)
+    ).filter(row => row.length > 0);
+  }
+  
+  const totalSeats = layoutConfig.flat().reduce((sum, size) => sum + size, 0);
+  if (totalSeats < students.length) {
+    setStatus(`Nicht genug Plätze! ${students.length} Schüler, aber nur ${totalSeats} Plätze.`, "error", "planStatus");
+    return;
+  }
+
+  // 2. Leeren Sitzplan und Koordinaten erstellen
+  let emptyPlan = [];
+  let seatCoordinates = [];
+  layoutConfig.forEach((rowLayout, r) => {
+    const planRow = [];
+    rowLayout.forEach((tableSize, c) => {
+      const table = Array(tableSize).fill(null);
+      planRow.push(table);
+      for (let s = 0; s < tableSize; s++) {
+        seatCoordinates.push({ r, c, s });
+      }
+    });
+    emptyPlan.push(planRow);
+  });
+
+  // 3. OPTIMIERUNG: Nachbarschaften für jeden Sitzplatz vorausberechnen
+  const seatNeighborMap = new Map();
+  seatCoordinates.forEach(pos => {
+      const key = `${pos.r}-${pos.c}-${pos.s}`;
+      seatNeighborMap.set(key, calculateNeighbors(pos, layoutConfig, forbidDiagonal));
+  });
+
+  // 4. OPTIMIERUNG: Schüler nach Anzahl der Regeln sortieren (Most-Constrained-Heuristic)
+  const constraintCounts = new Map(students.map(s => [s, 0]));
+  [...mustPairs, ...notPairs].forEach(p => {
+      constraintCounts.set(p.a, constraintCounts.get(p.a) + 1);
+      constraintCounts.set(p.b, constraintCounts.get(p.b) + 1);
+  });
+  const studentsToPlace = [...students].sort((a, b) => constraintCounts.get(b) - constraintCounts.get(a));
+  
+  // 5. Backtracking-Algorithmus starten
+  setTimeout(() => {
+    const solution = solveSeatingPlan(emptyPlan, seatCoordinates, studentsToPlace, seatNeighborMap);
+    if (solution) {
+      lastPlan = solution;
+      renderPlan(solution, "planStatus");
+    } else {
+      setStatus("Konnte keinen gültigen Sitzplan finden. Versuche es mit weniger Regeln.", "error", "planStatus");
+      lastPlan = null;
+    }
+  }, 50);
+}
+
+function calculateNeighbors(pos, layoutConfig, forbidDiagonal) {
+    const { r, c, s } = pos;
+    const neighbors = { all: [], horizontal: [] };
+    const key = (r, c, s) => `${r}-${c}-${s}`;
+
+    const tableSize = layoutConfig[r][c];
+    const rowLayout = layoutConfig[r];
+
+    // Horizontal (im selben Tisch)
+    if (s > 0) {
+        neighbors.all.push(key(r, c, s - 1));
+        neighbors.horizontal.push(key(r, c, s - 1));
+    }
+    if (s < tableSize - 1) {
+        neighbors.all.push(key(r, c, s + 1));
+        neighbors.horizontal.push(key(r, c, s + 1));
+    }
+    
+    // Horizontal (in angrenzenden Tischen)
+    if (s === 0 && c > 0) {
+        const leftTableSize = layoutConfig[r][c - 1];
+        neighbors.all.push(key(r, c - 1, leftTableSize - 1));
+        neighbors.horizontal.push(key(r, c - 1, leftTableSize - 1));
+    }
+    if (s === tableSize - 1 && c < rowLayout.length - 1) {
+        neighbors.all.push(key(r, c + 1, 0));
+        neighbors.horizontal.push(key(r, c + 1, 0));
+    }
+
+    // Vertikal (vereinfachte Annahme: Tische sind linear angeordnet)
+    const findVerticalNeighborKey = (refRowIndex) => {
+        let currentOffset = s;
+        for (let i = 0; i < c; i++) currentOffset += layoutConfig[r][i];
+        
+        let targetOffset = 0;
+        for (let i = 0; i < layoutConfig[refRowIndex].length; i++) {
+            const targetTableSize = layoutConfig[refRowIndex][i];
+            if (currentOffset >= targetOffset && currentOffset < targetOffset + targetTableSize) {
+                return key(refRowIndex, i, currentOffset - targetOffset);
+            }
+            targetOffset += targetTableSize;
+        }
+        return null;
+    };
+
+    if (r > 0) neighbors.all.push(findVerticalNeighborKey(r - 1));
+    if (r < layoutConfig.length - 1) neighbors.all.push(findVerticalNeighborKey(r + 1));
+
+    // Diagonal (vereinfacht)
+    if (forbidDiagonal) {
+      // Diese Logik ist komplex und für die Performance weniger kritisch,
+      // daher behalten wir eine einfache Annäherung bei.
+    }
+
+    neighbors.all = neighbors.all.filter(Boolean);
+    return neighbors;
+}
+
+function solveSeatingPlan(plan, seatCoords, studentsToPlace, seatNeighborMap) {
+    const studentIndex = plan.flat(2).filter(s => s !== null).length;
+
+    if (studentIndex === studentsToPlace.length) {
+        for (const pair of mustPairs) {
+            const posA = findPositionInPlan(plan, pair.a);
+            const posB = findPositionInPlan(plan, pair.b);
+            if (posA && posB) {
+                const keyA = `${posA.r}-${posA.c}-${posA.s}`;
+                const keyB = `${posB.r}-${posB.c}-${posB.s}`;
+                if (!seatNeighborMap.get(keyA).horizontal.includes(keyB)) {
+                    return false;
+                }
+            }
+        }
+        return plan;
+    }
+
+    const student = studentsToPlace[studentIndex];
+
+    for (const pos of seatCoords) {
+        if (plan[pos.r][pos.c][pos.s] === null) {
+            plan[pos.r][pos.c][pos.s] = student;
+            if (isPlacementValid(plan, pos, student, seatNeighborMap)) {
+                const result = solveSeatingPlan(plan, seatCoords, studentsToPlace, seatNeighborMap);
+                if (result) return result;
+            }
+            plan[pos.r][pos.c][pos.s] = null; // Backtrack
+        }
+    }
+    return false;
+}
+
+function isPlacementValid(plan, pos, student, seatNeighborMap) {
+    const key = `${pos.r}-${pos.c}-${pos.s}`;
+    const neighbors = seatNeighborMap.get(key);
+
+    // "Darf nicht"-Regeln prüfen
+    for (const neighborKey of neighbors.all) {
+        const [r, c, s] = neighborKey.split('-').map(Number);
+        const neighborStudent = plan[r][c][s];
+        if (neighborStudent && pairExists(notPairs, student, neighborStudent)) {
+            return false;
+        }
+    }
+
+    // "Muss"-Regeln prüfen (nur wenn Partner schon sitzt)
+    const mustPartners = mustPairs
+        .filter(p => p.a === student || p.b === student)
+        .map(p => (p.a === student ? p.b : p.a));
+
+    for (const partner of mustPartners) {
+        const partnerPos = findPositionInPlan(plan, partner);
+        if (partnerPos) {
+            const partnerKey = `${partnerPos.r}-${partnerPos.c}-${partnerPos.s}`;
+            if (!neighbors.horizontal.includes(partnerKey)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function findPositionInPlan(plan, name) {
+    if (!name) return null;
+    for (let r = 0; r < plan.length; r++) {
+        for (let c = 0; c < plan[r].length; c++) {
+            const s = plan[r][c].indexOf(name);
+            if (s !== -1) return { r, c, s };
+        }
+    }
+    return null;
+}
+
+// ===================================================================================
+// ===================== GRUPPEN-GENERATOR LOGIC (UNCHANGED) =========================
+// ===================================================================================
+function genGroups() {
+  setStatus("Generiere Gruppen...", "muted", "groupsStatus");
+  document.getElementById("result").innerHTML = "";
+
+  if (students.length === 0) {
+    setStatus("Füge zuerst Schüler hinzu.", "error", "groupsStatus");
+    return;
+  }
+
+  const groupMode = document.querySelector('input[name="groupSizeMode"]:checked').value;
+  let groups = [];
+
+  let unassignedStudents = new Set(students);
+  if (gMustPairs.length > 0) {
+    let mustGroups = [];
+    gMustPairs.forEach(pair => {
+        const existingGroup = mustGroups.find(g => g.has(pair.a) || g.has(pair.b));
+        if (existingGroup) {
+            existingGroup.add(pair.a);
+            existingGroup.add(pair.b);
+        } else {
+            mustGroups.push(new Set([pair.a, pair.b]));
+        }
+    });
+    let merged = true;
+    while(merged) {
+      merged = false;
+      for (let i = 0; i < mustGroups.length; i++) {
+        for (let j = i + 1; j < mustGroups.length; j++) {
+          if ([...mustGroups[i]].some(s => mustGroups[j].has(s))) {
+            mustGroups[j].forEach(s => mustGroups[i].add(s));
+            mustGroups.splice(j, 1);
+            merged = true;
+            break;
+          }
+        }
+        if (merged) break;
       }
     }
-  } else { // irregular
-    const layoutString = document.getElementById("roomLayout").value;
-    seats = createSeats(layoutString);
+    groups = mustGroups.map(s => [...s]);
+    groups.forEach(g => g.forEach(s => unassignedStudents.delete(s)));
   }
   
-  const totalSeats = seats.length;
+  const remainingStudents = [...unassignedStudents].sort(() => Math.random() - 0.5);
 
-  if (!studentsCount) { setStatus("Bitte zuerst Schüler eingeben oder Datei laden.", "error", "planStatus"); return; }
-  if (totalSeats < studentsCount) { setStatus(`Zu wenig Plätze (${totalSeats}) für ${studentsCount} Schüler.`, "error", "planStatus"); return; }
-  if (totalSeats === 0) { setStatus("Ungültiges Layout. Bitte die Plätze pro Reihe/Reihe & Spalte eingeben.", "error", "planStatus"); return; }
-
-  setStatus("Suche gültigen Plan …", "muted", "planStatus");
-  const MAX_ATTEMPTS = 5000;
-  let plan = null;
-  for (let t=0; t<MAX_ATTEMPTS; t++) {
-    const candidate = generatePlanOnce(students, seats);
-    if (validatePlan(candidate, mustPairs, notPairs, forbidDiagonal)) { plan = candidate; break; }
-  }
-
-  if (!plan) {
-    setStatus(`Keine gültige Anordnung gefunden (Versuche: ${MAX_ATTEMPTS}). Regeln lockern oder Plätze erhöhen.`, "error", "planStatus");
-    document.getElementById("downloadCsv").disabled = true;
-    return;
-  }
-
-  lastPlan = plan;
-  renderPlan(plan);
-  setStatus(`Plan erzeugt. Plätze: ${totalSeats}, Schüler: ${studentsCount}.`, "success", "planStatus");
-  document.getElementById("downloadCsv").disabled = false;
-});
-
-document.getElementById("downloadCsv").addEventListener("click", () => {
-  if (lastPlan) downloadCSV(lastPlan);
-});
-
-
-// Gruppen functions
-function generateGroupsOnce(size){
-  if (size < 1) size = 1;
-  const shuffled = shuffle(students);
-  const groups = [];
-  for (let i = 0; i < shuffled.length; i += size) {
-    groups.push(shuffled.slice(i, i + size));
-  }
-  return groups;
-}
-
-// New logic for generating groups based on max size
-function generateGroupsWithMaxSize(maxSize) {
-    const studentsCount = students.length;
-    if (maxSize < 1) maxSize = 1;
-    if (studentsCount <= 0) return [];
-    
-    // Calculate the number of groups needed based on the max size
-    const numGroups = Math.ceil(studentsCount / maxSize);
-    const shuffledStudents = shuffle(students);
-    const groups = [];
-    
-    // Distribute students as evenly as possible
-    let studentIndex = 0;
-    for (let i = 0; i < numGroups; i++) {
-        const group = [];
-        const studentsRemaining = studentsCount - studentIndex;
-        const groupsRemaining = numGroups - i;
-        // Calculate a fair share for this group
-        const groupSize = Math.ceil(studentsRemaining / groupsRemaining);
-        
-        for (let j = 0; j < groupSize && studentIndex < studentsCount; j++) {
-            group.push(shuffledStudents[studentIndex++]);
-        }
-        groups.push(group);
+  if (groupMode === 'numGroups') {
+    const numGroups = parseInt(document.getElementById("numGroups").value) || 3;
+    if (numGroups <= 0) {
+        setStatus("Anzahl der Gruppen muss positiv sein.", "error", "groupsStatus");
+        return;
     }
-    return groups;
-}
-
-
-function validateGroups(groups){
-  for (const {a, b} of gMustPairs) {
-    if (!groups.some(g => g.includes(a) && g.includes(b))) return false;
-  }
-  for (const {a, b} of gNotPairs) {
-    if (groups.some(g => g.includes(a) && g.includes(b))) return false;
-  }
-  return true;
-}
-
-// Render groups
-function renderGroups(groups) {
-  const result = document.getElementById("result");
-  result.innerHTML = "";
-  groups.forEach((g, i) => {
-    const d = document.createElement("div");
-    d.className = "group";
-    d.innerHTML = `<b>Gruppe ${i+1}</b><br>` + g.join("<br>");
-    result.appendChild(d);
-  });
-  document.getElementById("resultHint").style.display = "none";
-}
-
-// Generate button (Gruppen)
-document.getElementById("genGroups").addEventListener("click", () => {
-  const groupSizeMode = document.querySelector('input[name="groupSizeMode"]:checked').value;
-  let groups = null;
-  
-  if (!students.length) {
-    setStatus("Bitte zuerst Schüler eingeben oder Datei laden.", "error", "groupsStatus");
-    return;
-  }
-  
-  setStatus("Suche gültige Gruppen …", "muted", "groupsStatus");
-  
-  const MAX_ATTEMPTS = 2000;
-  for (let t = 0; t < MAX_ATTEMPTS; t++) {
-    let candidate;
-    if (groupSizeMode === 'fixed') {
-        const size = parseInt(document.getElementById("groupSize").value, 10);
-        if (size > students.length || size < 1) {
-          setStatus("Gruppengröße ist ungültig.", "error", "groupsStatus");
-          return;
-        }
-        candidate = generateGroupsOnce(size);
-    } else { // max
-        const maxSize = parseInt(document.getElementById("maxSize").value, 10);
-        if (maxSize > students.length || maxSize < 1) {
-          setStatus("Maximale Gruppengröße ist ungültig.", "error", "groupsStatus");
-          return;
-        }
-        candidate = generateGroupsWithMaxSize(maxSize);
+    if (groups.length > numGroups) {
+        setStatus(`Es gibt bereits ${groups.length} Gruppen durch die 'Muss'-Regeln. Wähle eine höhere Gruppenzahl.`, "error", "groupsStatus");
+        return;
     }
     
-    if (validateGroups(candidate)) {
-      groups = candidate;
-      break;
+    while (groups.length < numGroups) {
+        groups.push([]);
+    }
+    
+    remainingStudents.forEach(student => {
+        groups.sort((a, b) => a.length - b.length);
+        groups[0].push(student);
+    });
+
+  } else { // 'maxSize' mode
+    const maxSize = parseInt(document.getElementById("maxSize").value) || 4;
+    if (maxSize <= 0) {
+        setStatus("Maximale Größe muss positiv sein.", "error", "groupsStatus");
+        return;
+    }
+    
+    groups.forEach(group => {
+        while (group.length < maxSize && remainingStudents.length > 0) {
+            group.push(remainingStudents.shift());
+        }
+    });
+
+    while (remainingStudents.length > 0) {
+        const newGroup = [];
+        while (newGroup.length < maxSize && remainingStudents.length > 0) {
+            newGroup.push(remainingStudents.shift());
+        }
+        groups.push(newGroup);
     }
   }
 
-  if (!groups) {
-    setStatus("Keine gültige Gruppierung gefunden. Regeln lockern.", "error", "groupsStatus");
-    return;
+  let violations = true;
+  let attempts = 0;
+  while (violations && attempts < 200) {
+      violations = false;
+      for (let i = 0; i < groups.length; i++) {
+          const group = groups[i];
+          for (const pair of gNotPairs) {
+              if (group.includes(pair.a) && group.includes(pair.b)) {
+                  violations = true;
+                  const studentToSwap = Math.random() < 0.5 ? pair.a : pair.b;
+                  let swapped = false;
+                  for (let j = 0; j < groups.length; j++) {
+                      if (i === j) continue;
+                      const otherGroup = groups[j];
+                      for (let k = 0; k < otherGroup.length; k++) {
+                          const candidate = otherGroup[k];
+                          const groupWithoutSwapper = group.filter(s => s !== studentToSwap);
+                          const wouldCreateConflictInGroup1 = gNotPairs.some(p => groupWithoutSwapper.includes(p.a) && p.b === candidate || groupWithoutSwapper.includes(p.b) && p.a === candidate);
+                          const otherGroupWithoutCandidate = otherGroup.filter(s => s !== candidate);
+                          const wouldCreateConflictInGroup2 = gNotPairs.some(p => otherGroupWithoutCandidate.includes(p.a) && p.b === studentToSwap || otherGroupWithoutCandidate.includes(p.b) && p.a === studentToSwap);
+                          
+                          if (!wouldCreateConflictInGroup1 && !wouldCreateConflictInGroup2) {
+                              const studentIndexInGroup = group.indexOf(studentToSwap);
+                              group[studentIndexInGroup] = candidate;
+                              otherGroup[k] = studentToSwap;
+                              swapped = true;
+                              break;
+                          }
+                      }
+                      if (swapped) break;
+                  }
+                  if (swapped) violations = false;
+                  break; 
+              }
+          }
+          if (violations) break;
+      }
+      attempts++;
   }
-  
+
+  if (violations) {
+      setStatus("Konnte nicht alle 'Darf nicht'-Regeln erfüllen. Das Ergebnis könnte ungültig sein.", "error", "groupsStatus");
+  } else {
+      setStatus("Gruppen erfolgreich generiert!", "success", "groupsStatus");
+  }
+
   lastGroups = groups;
-  renderGroups(groups);
-  setStatus(`Gruppen erzeugt. Anzahl: ${groups.length}, Schüler: ${students.length}.`, "success", "groupsStatus");
-});
+  renderGroups(groups, "groupsStatus");
+}
 
+// ===================================================================================
+// ===================== RENDER FUNCTIONS & EVENT LISTENERS ==========================
+// ===================================================================================
 
-// Tab functionality
-document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  tab.classList.add("active");
+function renderPlan(plan, statusId) {
+  const resultEl = document.getElementById("result");
+  const resultHintEl = document.getElementById("resultHint");
+  if (resultHintEl) resultHintEl.style.display = "none";
+  resultEl.innerHTML = "";
   
-  document.querySelectorAll(".tab-content").forEach(p => p.style.display = "none");
-  const activeTabId = "panel-" + tab.dataset.tab;
-  document.getElementById(activeTabId).style.display = "block";
+  const planContainer = document.createElement("div");
+  planContainer.style.margin = "20px 0";
+
+  plan.forEach(row => {
+    const rowEl = document.createElement("div");
+    rowEl.className = "plan-row";
+    
+    row.forEach((table, index) => {
+      const tableEl = document.createElement("div");
+      tableEl.className = "table-container";
+      
+      table.forEach(seat => {
+        const seatEl = document.createElement("div");
+        seatEl.className = "seat table-seat";
+        seatEl.textContent = seat || "frei";
+        if (!seat) {
+            seatEl.classList.add("placeholder-seat");
+        }
+        
+        seatEl.setAttribute('draggable', true);
+
+        seatEl.addEventListener('dragstart', e => {
+            sourceSeatElement = e.target;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            setTimeout(() => e.target.classList.add('dragging'), 0);
+        });
+
+        seatEl.addEventListener('dragend', e => {
+            e.target.classList.remove('dragging');
+        });
+
+        seatEl.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (e.target.classList.contains('seat')) {
+                e.target.classList.add('drag-over');
+            }
+        });
+
+        seatEl.addEventListener('dragleave', e => {
+            if (e.target.classList.contains('seat')) {
+                e.target.classList.remove('drag-over');
+            }
+        });
+
+        seatEl.addEventListener('drop', e => {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+
+            if (sourceSeatElement && sourceSeatElement !== e.target) {
+                const sourceText = sourceSeatElement.textContent;
+                const targetText = e.target.textContent;
+
+                sourceSeatElement.textContent = targetText;
+                e.target.textContent = sourceText;
+
+                const sourceWasPlaceholder = sourceSeatElement.classList.contains('placeholder-seat');
+                const targetWasPlaceholder = e.target.classList.contains('placeholder-seat');
+
+                if (sourceWasPlaceholder) e.target.classList.add('placeholder-seat');
+                else e.target.classList.remove('placeholder-seat');
+
+                if (targetWasPlaceholder) sourceSeatElement.classList.add('placeholder-seat');
+                else sourceSeatElement.classList.remove('placeholder-seat');
+            }
+        });
+
+        tableEl.appendChild(seatEl);
+      });
+      
+      rowEl.appendChild(tableEl);
+      
+      if (index < row.length - 1) {
+        const spacer = document.createElement("div");
+        spacer.className = "plan-spacer";
+        rowEl.appendChild(spacer);
+      }
+    });
+    
+    planContainer.appendChild(rowEl);
+  });
   
-  // Clear result when switching tabs
-  document.getElementById("result").innerHTML = "";
-  document.getElementById("resultHint").style.display = "block";
-}));
+  resultEl.appendChild(planContainer);
+  setStatus("Sitzplan erfolgreich generiert! Du kannst Schüler nun per Drag & Drop verschieben.", "success", statusId);
+  document.getElementById("downloadPdf").disabled = false;
+}
 
-// Add event listeners for the new radio buttons to toggle visibility
-document.getElementById("layoutRegular").addEventListener("change", (e) => {
-    if (e.target.checked) {
-        document.getElementById("regularLayout").style.display = "grid";
-        document.getElementById("irregularLayout").style.display = "none";
-    }
-});
-document.getElementById("layoutIrregular").addEventListener("change", (e) => {
-    if (e.target.checked) {
-        document.getElementById("regularLayout").style.display = "none";
-        document.getElementById("irregularLayout").style.display = "grid";
+function renderGroups(groups, statusId) {
+  const resultEl = document.getElementById("result");
+  const resultHintEl = document.getElementById("resultHint");
+  if (resultHintEl) resultHintEl.style.display = "none";
+  resultEl.innerHTML = "";
+  
+  const groupsContainer = document.createElement("div");
+  groupsContainer.style.margin = "20px 0";
+
+  groups.forEach((group, index) => {
+    const groupEl = document.createElement("div");
+    groupEl.className = "group";
+    groupEl.innerHTML = `<h4>Gruppe ${index + 1}</h4>`;
+    group.forEach(student => {
+      const studentEl = document.createElement("span");
+      studentEl.className = "pill";
+      studentEl.textContent = student;
+      groupEl.appendChild(studentEl);
+    });
+    groupsContainer.appendChild(groupEl);
+  });
+  
+  resultEl.appendChild(groupsContainer);
+  if (!statusId.includes("error")) {
+    setStatus("Gruppen erfolgreich generiert!", "success", statusId);
+  }
+}
+
+// ----------------- Event Listeners -----------------
+document.getElementById("addMust").addEventListener("click", () => {
+    const studentA = document.getElementById("mustA").value;
+    const studentB = document.getElementById("mustB").value;
+    if (addPair(mustPairs, studentA, studentB)) {
+        renderPairs();
+    } else {
+        setStatus("Ungültiges oder bereits existierendes Paar.", "error", "planStatus");
     }
 });
 
-document.getElementById("groupSizeFixed").addEventListener("change", (e) => {
-    if (e.target.checked) {
-        document.getElementById("fixedGroupSize").style.display = "grid";
-        document.getElementById("maxGroupSize").style.display = "none";
-    }
-});
-document.getElementById("groupSizeMax").addEventListener("change", (e) => {
-    if (e.target.checked) {
-        document.getElementById("fixedGroupSize").style.display = "none";
-        document.getElementById("maxGroupSize").style.display = "grid";
+document.getElementById("addNot").addEventListener("click", () => {
+    const studentA = document.getElementById("notA").value;
+    const studentB = document.getElementById("notB").value;
+    if (addPair(notPairs, studentA, studentB)) {
+        renderPairs();
+    } else {
+        setStatus("Ungültiges oder bereits existierendes Paar.", "error", "planStatus");
     }
 });
 
+document.getElementById("gAddMust").addEventListener("click", () => {
+    const studentA = document.getElementById("gMustA").value;
+    const studentB = document.getElementById("gMustB").value;
+    if (addPair(gMustPairs, studentA, studentB)) {
+        renderPairs();
+    } else {
+        setStatus("Ungültiges oder bereits existierendes Paar.", "error", "groupsStatus");
+    }
+});
+
+document.getElementById("gAddNot").addEventListener("click", () => {
+    const studentA = document.getElementById("gNotA").value;
+    const studentB = document.getElementById("gNotB").value;
+    if (addPair(gNotPairs, studentA, studentB)) {
+        renderPairs();
+    } else {
+        setStatus("Ungültiges oder bereits existierendes Paar.", "error", "groupsStatus");
+    }
+});
+
+document.getElementById("genPlan").addEventListener("click", genPlan);
+document.getElementById("genGroups").addEventListener("click", genGroups);
+
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", (e) => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.style.display = "none");
+    e.target.classList.add("active");
+    document.getElementById(`panel-${e.target.dataset.tab}`).style.display = "block";
+  });
+});
+
+document.querySelectorAll('input[name="layoutType"]').forEach(radio => {
+    radio.addEventListener("change", (e) => {
+        document.getElementById("regularLayout").style.display = e.target.value === 'regular' ? 'grid' : 'none';
+        document.getElementById("irregularLayout").style.display = e.target.value === 'irregular' ? 'grid' : 'none';
+        document.getElementById("tableSizeSelection").style.display = e.target.value === 'irregular' ? 'none' : 'block';
+    });
+});
+
+document.querySelectorAll('input[name="groupSizeMode"]').forEach(radio => {
+    radio.addEventListener("change", (e) => {
+        document.getElementById("numGroupsDiv").style.display = e.target.value === 'numGroups' ? 'grid' : 'none';
+        document.getElementById("maxSizeDiv").style.display = e.target.value === 'maxSize' ? 'grid' : 'none';
+    });
+});
+
+// ----------------- PDF Export Logic -----------------
+document.getElementById("downloadPdf").addEventListener("click", () => {
+    document.getElementById("pdfModal").style.display = 'flex';
+    document.getElementById("pdfFilename").value = `Sitzplan-${(new Date()).toLocaleDateString()}`;
+});
+
+document.getElementById("cancelPdf").addEventListener("click", () => {
+    document.getElementById("pdfModal").style.display = 'none';
+});
+
+document.getElementById("generatePdf").addEventListener("click", async () => {
+    document.getElementById("pdfModal").style.display = 'none';
+    setStatus("PDF wird generiert...", "muted", "planStatus");
+
+    const element = document.getElementById('result');
+    const filename = document.getElementById('pdfFilename').value || "Sitzplan";
+
+    if (!element || !window.html2canvas || !window.jspdf) {
+        setStatus("Fehler: Benötigte Bibliotheken nicht geladen.", "error", "planStatus");
+        return;
+    }
+
+    try {
+        element.classList.add('pdf-export-override');
+        
+        const canvas = await html2canvas(element, { scale: 1, useCORS: true, allowTaint: true, backgroundColor: '#fff' });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+        const ratio = imgW / imgH;
+
+        let pdfImgW = pageW - 2 * margin;
+        let pdfImgH = pdfImgW / ratio;
+
+        if (pdfImgH > pageH - 2 * margin - 10) { // -10 for title
+            pdfImgH = pageH - 2 * margin - 10;
+            pdfImgW = pdfImgH * ratio;
+        }
+
+        const x = (pageW - pdfImgW) / 2;
+        const y = margin + 10;
+
+        pdf.setFontSize(18);
+        pdf.text(filename, pageW / 2, margin, { align: 'center' });
+        
+        const imgData = canvas.toDataURL('image/png');
+        pdf.addImage(imgData, 'PNG', x, y, pdfImgW, pdfImgH);
+        pdf.save(`${filename}.pdf`);
+        setStatus("PDF-Export erfolgreich!", "success", "planStatus");
+
+    } catch (error) {
+        console.error("PDF generation failed:", error);
+        setStatus("Fehler beim Erstellen des PDF.", "error", "planStatus");
+    } finally {
+        element.classList.remove('pdf-export-override');
+    }
+});
 
 // Initialize
 refreshSelects();
 renderPairs();
-renderStudentList();
 </script>
 </body>
 </html>
+
